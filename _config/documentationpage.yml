@@ -1,0 +1,11 @@
+---
+Name: clippy_cms_help_menu
+---
+SilverStripe\Admin\LeftAndMain:
+  help_links:
+    # Add a new link
+    'Bespoke CMS User Guide': '/cms-user-guide'
+
+SilverStripe\Clippy\Controllers\DocumentationPageController:
+  docs_dir: /docs/userguides
+  screenshots_dir: /docs/userguides/img

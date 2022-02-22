@@ -1,0 +1,14 @@
+SilverStripe\Clippy\PageTypes\DocumentationPage:
+  cms_user_guide:
+    URL: cms-user-guide
+
+SilverStripe\Security\Group:
+  content_authors:
+    Code: content-authors
+    Title: Content Authors
+
+SilverStripe\Security\Member:
+  content_author:
+    FirstName: Freddie
+    Surname: Mercury
+    Groups: =>SilverStripe\Security\Group.content_authors
