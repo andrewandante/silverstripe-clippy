@@ -2,8 +2,8 @@
 
 namespace SilverStripe\Clippy\PageTypes;
 
-use App\Controllers\DocumentationPageController;
 use Page;
+use SilverStripe\Clippy\Controllers\DocumentationPageController;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\ReadonlyField;
