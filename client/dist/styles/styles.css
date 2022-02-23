@@ -1,0 +1,15 @@
+.img-max-width img {
+    max-width: 100%;
+}
+
+.table-borders table {
+    border: 1px solid black;
+}
+.table-borders th {
+    border: 1px solid black;
+    padding: 5px 10px;
+}
+.table-borders td {
+    border: 1px solid black;
+    padding: 5px 10px;
+}

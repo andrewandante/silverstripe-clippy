@@ -2,6 +2,10 @@
 Name: clippy_cms_help_menu
 ---
 SilverStripe\Admin\LeftAndMain:
+  extra_requirements_javascript:
+    - 'silverstripe/clippy: client/dist/js/bundle.js'
+  extra_requirements_css:
+    - 'silverstripe/clippy: client/dist/styles/styles.css'
   help_links:
     # Add a new link
     'Bespoke CMS User Guide': '/cms-user-guide'
@@ -9,3 +13,9 @@ SilverStripe\Admin\LeftAndMain:
 SilverStripe\Clippy\Controllers\DocumentationPageController:
   docs_dir: /docs/userguides
   screenshots_dir: /docs/userguides/img
+  allowed_extensions:
+    - md
+
+SilverStripe\CMS\Controllers\CMSMain:
+  extensions:
+    - SilverStripe\Clippy\Extension\CMSMainExtension
