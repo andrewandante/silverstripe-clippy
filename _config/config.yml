@@ -9,6 +9,8 @@ SilverStripe\Admin\LeftAndMain:
   help_links:
     # Add a new link
     'Bespoke CMS User Guide': '/cms-user-guide'
+  extensions:
+    - SilverStripe\Clippy\Extension\DocumentationPageLeftAndMain
 
 SilverStripe\Clippy\PageTypes\DocumentationPage:
   default_url_segment: cms-user-guide
