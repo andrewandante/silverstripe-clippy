@@ -1,5 +1,5 @@
 ---
-Name: clippy_cms_help_menu
+Name: clippy_config
 ---
 SilverStripe\Admin\LeftAndMain:
   extra_requirements_javascript:
@@ -19,3 +19,8 @@ SilverStripe\Clippy\Controllers\DocumentationPageController:
 SilverStripe\CMS\Controllers\CMSMain:
   extensions:
     - SilverStripe\Clippy\Extension\CMSMainExtension
+
+# Hide the documentation page from CMS site tree and frontend heirarchies
+SilverStripe\ORM\Hierarchy\Hierarchy:
+  hide_from_hierarchy:
+    - SilverStripe\Clippy\PageTypes\DocumentationPage
