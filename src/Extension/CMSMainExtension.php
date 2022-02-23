@@ -2,8 +2,10 @@
 
 namespace SilverStripe\Clippy\Extension;
 
+use SilverStripe\Clippy\Controllers\DocumentationPageController;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\Extension;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
 use SilverStripe\Clippy\Model\UserGuide;
 use SilverStripe\Clippy\Controllers\CMSUserGuideController;
@@ -37,29 +39,7 @@ class CMSMainExtension extends Extension
 
     public function getUserGuideContent()
     {
-        $ugid = $this->getOwner()->getRequest()->getVar('ugid');
-        $pageID = $this->getOwner()->currentPageID();
-
-        if (!$pageID) {
-            return null;
-        }
-
-        $page = Page::get()->find('ID', $pageID);
-
-        if (!$page) {
-            return null;
-        }
-
-        if ($ugid !== null) {
-            $userguide = UserGuide::get_by_id($ugid);
-
-            if ($userguide->exists() && $userguide->DerivedClass === $page->ClassName) {
-                return $userguide->Content;
-            }
-        }
-
-        $defaultUserguide = UserGuide::get()->find('DerivedClass', $page->ClassName);
-
-        return $defaultUserguide && $defaultUserguide->exists() ? $defaultUserguide->Content : null;
+        $controller = Injector::inst()->get(DocumentationPageController::class);
+        return $controller->getNavigation() . $controller->getContent();
     }
 }
