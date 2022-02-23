@@ -1,0 +1,9 @@
+---
+Name: clippy_routes
+After:
+  - '#rootroutes'
+  - '#coreroutes'
+---
+SilverStripe\Control\Director:
+  rules:
+    'userguides/$Action': 'SilverStripe\Clippy\Controllers\UserGuideController'
