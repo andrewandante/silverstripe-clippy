@@ -10,6 +10,9 @@ SilverStripe\Admin\LeftAndMain:
     # Add a new link
     'Bespoke CMS User Guide': '/cms-user-guide'
 
+SilverStripe\Clippy\PageTypes\DocumentationPage:
+  default_url_segment: cms-user-guide
+
 SilverStripe\Clippy\Controllers\DocumentationPageController:
   docs_dir: /docs/userguides
   screenshots_dir: /docs/userguides/img

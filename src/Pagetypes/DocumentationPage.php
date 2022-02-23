@@ -4,6 +4,7 @@ namespace SilverStripe\Clippy\PageTypes;
 
 use Page;
 use SilverStripe\Clippy\Controllers\DocumentationPageController;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\ReadonlyField;
@@ -121,6 +122,7 @@ class DocumentationPage extends Page
             if (!DocumentationPage::get()->first()) {
                 $DocumentationPage = new DocumentationPage();
                 $DocumentationPage->Title = 'CMS User Guide';
+                $DocumentationPage->URLSegment = Config::inst()->get(DocumentationPage::class, 'default_url_segment');
                 $DocumentationPage->Content = '';
                 $DocumentationPage->write();
                 $DocumentationPage->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
