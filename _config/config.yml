@@ -1,5 +1,5 @@
 ---
-Name: clippy_cms_help_menu
+Name: clippy_config
 ---
 SilverStripe\Admin\LeftAndMain:
   extra_requirements_javascript:
