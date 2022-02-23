@@ -51,43 +51,4 @@ class CMSUserGuideController extends CMSMain
         return 'guide';
     }
 
-    /**
-     * @see LeftAndMain::show()
-     * @return HTTPResponse
-     * @throws HTTPResponse_Exception
-     */
-    public function markdown(HTTPRequest $request)
-    {
-        if ($request->param('ID')) {
-            $this->setCurrentPageID($request->param('ID'));
-        }
-
-        $pageID = $this->currentPageID();
-        $response = $this->getResponse();
-        $response->addHeader('Content-Type', 'application/json');
-        $response->setBody(json_encode([
-            'ID' => $pageID,
-            'Content' => $this->getUserGuideContent(),
-        ]));
-
-        return $response;
-    }
-
-    /**
-     * Here we are overriding the show method in order to force a page reload if
-     * ugid is set in the URL. It would be better to just trigger a reload of
-     * the preview panel
-     *
-     * @param $request
-     * @return mixed
-     */
-    public function show($request)
-    {
-        $response = parent::show($request);
-        if ($request->getVar('ugid')) {
-            $response->addHeader('X-Reload', true);
-            $response->addHeader('X-ControllerURL', $request->getURL(true));
-        }
-        return $response;
-    }
 }
