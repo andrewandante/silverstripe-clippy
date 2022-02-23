@@ -5,9 +5,11 @@ namespace SilverStripe\Clippy\Controllers;
 use League\CommonMark\GithubFlavoredMarkdownConverter;
 use PageController;
 use SilverStripe\Core\Path;
+use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
+use SilverStripe\View\ArrayData;
 
 /**
  * This page type allows for display of .md documentation files as html content within a web page.
@@ -47,7 +49,7 @@ class DocumentationPageController extends PageController
     public function viewdoc(): array
     {
         return [
-            'Navigation' => DBHTMLText::create()->setValue($this->getNavigation()),
+            'Navigation' => $this->getNavigation(),
             'Content' => DBHTMLText::create()->setValue($this->getContent()),
         ];
     }
@@ -81,26 +83,57 @@ class DocumentationPageController extends PageController
 
     /**
      * Get index to display as navigation menu.
-     * It would also be possible to scan the docs dir and construct
-     * a list of docs to use as nav list BUT that has a number of hurdles that
-     * would need to be overcome, like ordering of list items and nested urls of files.
-     * So for now that idea can be shelved as a potential future enhancement.
+     * This parses the converted markdown (html) from _index.md and constructs as
+     * ArrayList which can be iterated over (in a frontend template, for example).
      *
-     * @return string
+     * @return ArrayList
      */
-    public function getNavigation(): string
+    public function getNavigation(): ArrayList
     {
-        // Where we have a nested list (ie, a ul nested within a li, after its a tag)
-        // we inject a span which we can target for toggling the list item open and
-        // closed to preview its contents
-        $html = str_replace(
-            '</a>
-<ul>', // I know this looks bung, but the ul needs to be on the next line for the search/replace. Please don't change
-            '</a><span class="toggle"></span>'."\n\r".'<ul>',
-            $this->getConvertedMD('_index.md')
-        );
+        $html = $this->getConvertedMD('_index.md');
 
-        return DBHTMLText::create()->setValue($html);
+        $dom = new \DOMDocument();
+        $dom->preserveWhiteSpace = false;
+        $dom->loadHTML($html);
+        $list = $dom->getElementsByTagName('ul')->item(0);
+
+        return $this->getListData($list);
+    }
+
+    /**
+     * Iterate over a 'ul' DOMElement and add data from its 'li' childNodes to an ArrayList.
+     * Specifically, the Title and Href data is obtained from the 'a' tags within those 'li' nodes.
+     * Also recursively checks for nested ul DOMElements and adds them as children to th ArrayList's items.
+     *
+     * @param object $list DOMElement 'ul'
+     * @return ArrayList
+     */
+    public function getListData($list): ArrayList
+    {
+        $navData = ArrayList::create();
+        foreach ($list->childNodes as $child) {
+
+            // we only care about 'li' children (not newlines etc - DOMDocument gives us all sorts of stuff)
+            if ($child->nodeName === 'li') {
+                $data = [];
+
+                // get data from the (first) 'a' tag contained in this 'li'
+                if ($child->getElementsByTagName('a')->item(0)) {
+                    $link = $child->getElementsByTagName('a')->item(0);
+                    $data['Title'] = $link->nodeValue;
+                    $data['Link'] = $link->getAttribute('href');
+                }
+
+                // recursively add any nested 'ul' nodes
+                if ($child->getElementsByTagName('ul')->item(0)) {
+                    $data['Children'] = $this->getListData($child->getElementsByTagName('ul')->item(0));
+                }
+
+                if (count($data) > 0) {
+                    $navData->push(ArrayData::create($data));
+                }
+            }
+        }
     }
 
     /**
@@ -179,7 +212,7 @@ class DocumentationPageController extends PageController
     protected function index(): array
     {
         return [
-            'Navigation' => DBHTMLText::create()->setValue($this->getNavigation()),
+            'Navigation' => $this->getNavigation(),
             'Content' => DBHTMLText::create()->setValue($this->getContent()),
         ];
     }
