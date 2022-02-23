@@ -19,3 +19,8 @@ SilverStripe\Clippy\Controllers\DocumentationPageController:
 SilverStripe\CMS\Controllers\CMSMain:
   extensions:
     - SilverStripe\Clippy\Extension\CMSMainExtension
+
+# Hide the documentation page from CMS site tree and frontend heirarchies
+SilverStripe\ORM\Hierarchy\Hierarchy:
+  hide_from_hierarchy:
+    - SilverStripe\Clippy\PageTypes\DocumentationPage
