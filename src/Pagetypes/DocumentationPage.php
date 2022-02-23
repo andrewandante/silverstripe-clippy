@@ -58,6 +58,7 @@ class DocumentationPage extends Page
         $fields->removeFieldsFromTab(
             'Root.Main',
             [
+                'Content',
                 'URLSegment',
                 'MenuTitle',
                 'ElementalArea',
@@ -120,13 +121,13 @@ class DocumentationPage extends Page
         // phpcs:ignore
         if (static::class == self::class && $this->config()->create_default_pages) {
             if (!DocumentationPage::get()->first()) {
-                $DocumentationPage = new DocumentationPage();
-                $DocumentationPage->Title = 'CMS User Guide';
-                $DocumentationPage->URLSegment = Config::inst()->get(DocumentationPage::class, 'default_url_segment');
-                $DocumentationPage->Content = '';
-                $DocumentationPage->write();
-                $DocumentationPage->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
-                $DocumentationPage->flushCache();
+                $documentationPage = new DocumentationPage();
+                $documentationPage->Title = 'CMS User Guide';
+                $documentationPage->URLSegment = Config::inst()->get(DocumentationPage::class, 'default_url_segment');
+                $documentationPage->Content = '';
+                $documentationPage->write();
+                $documentationPage->copyVersionToStage(Versioned::DRAFT, Versioned::LIVE);
+                $documentationPage->flushCache();
                 DB::alteration_message('Documentation Page created', 'created');
             }
         }

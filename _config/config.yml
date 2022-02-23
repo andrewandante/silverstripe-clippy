@@ -2,8 +2,6 @@
 Name: clippy_config
 ---
 SilverStripe\Admin\LeftAndMain:
-  extra_requirements_javascript:
-    - 'silverstripe/clippy: client/dist/js/bundle.js'
   extra_requirements_css:
     - 'silverstripe/clippy: client/dist/styles/styles.css'
   help_links:
@@ -14,6 +12,8 @@ SilverStripe\Admin\LeftAndMain:
 
 SilverStripe\Clippy\PageTypes\DocumentationPage:
   default_url_segment: cms-user-guide
+  extensions:
+    - SilverStripe\Clippy\Extension\DocumentationPageMetaTagsExtension
 
 SilverStripe\Clippy\Controllers\DocumentationPageController:
   docs_dir: /docs/userguides
@@ -29,3 +29,7 @@ SilverStripe\CMS\Controllers\CMSMain:
 SilverStripe\ORM\Hierarchy\Hierarchy:
   hide_from_hierarchy:
     - SilverStripe\Clippy\PageTypes\DocumentationPage
+
+SilverStripe\CMS\Model\SiteTree:
+  extensions:
+    - SilverStripe\Clippy\Extension\SiteTreePreviewLinkExtension

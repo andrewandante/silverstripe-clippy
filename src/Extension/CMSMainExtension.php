@@ -14,7 +14,7 @@ use Page;
 class CMSMainExtension extends Extension
 {
 
-    public function LinkPageUserGuide()
+    public function getLinkPageUserGuide(): ?string
     {
         $owner = $this->getOwner();
         if ($id = $owner->currentPageID()) {
@@ -26,20 +26,17 @@ class CMSMainExtension extends Extension
         }
     }
 
-    public function IsUserGuideController()
+    public function getIsUserGuideController(): bool
     {
         return get_class($this->getOwner()) === CMSUserGuideController::class;
     }
 
-    public function ShowUserGuide()
+    public function getHasUserGuides(): bool
     {
-        return HTMLEditorField::create('UserGuideContent', 'User Guide Content', $this->getUserGuideContent())
-            ->performReadonlyTransformation();
-    }
+        $id = $this->owner->currentPageID();
+        $page = Page::get_by_id($id);
+        $userguides = UserGuide::get()->filter('DerivedClass', $page->ClassName);
 
-    public function getUserGuideContent()
-    {
-        $controller = Injector::inst()->get(DocumentationPageController::class);
-        return $controller->getNavigation() . $controller->getContent();
+        return $userguides && $userguides->count() > 0;
     }
 }
