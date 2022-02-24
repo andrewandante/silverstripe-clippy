@@ -2,6 +2,8 @@
 
 namespace SilverStripe\Clippy\Model;
 
+use SilverStripe\Clippy\Controllers\DocumentationPageController;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\ORM\DataObject;
 
 class UserGuide extends DataObject
@@ -24,4 +26,11 @@ class UserGuide extends DataObject
         'Description' => 'Description',
     ];
 
+    public function getURLSegment(): string
+    {
+        $fullDocsDir = BASE_PATH . Config::inst()->get(DocumentationPageController::class, 'docs_dir');
+        $relativePath = substr($this->MarkdownPath, strlen($fullDocsDir));
+
+        return substr($relativePath, 0, -strlen('.md'));
+    }
 }
