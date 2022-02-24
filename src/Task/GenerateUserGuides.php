@@ -13,6 +13,7 @@ use SilverStripe\Clippy\PageTypes\DocumentationPage;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Path;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\Clippy\Model\UserGuide;
 
@@ -58,6 +59,8 @@ class GenerateUserGuides extends BuildTask
             }
 
             $file = $file[0];
+
+            $this->log('Creating guide for file: ' . $file);
 
             $guide = UserGuide::create();
             $guide->Title = basename($file);
@@ -117,26 +120,30 @@ class GenerateUserGuides extends BuildTask
                 $relativeLinkPath = substr($fullLinkPath, strlen($fullDocsDir));
 
                 if ($this->isRelativeLink($linkHref) || !$this->isJumpToLink($linkHref)) {
+                    $finalPath = strpos($relativeLinkPath, '.md') !== false
+                        ? substr($relativeLinkPath, 0, -strlen('.md'))
+                        : $relativeLinkPath;
                     $link->setAttribute(
                         'href',
-                        DIRECTORY_SEPARATOR
-                        . $docPageSegment
-                        . DIRECTORY_SEPARATOR
-                        . 'viewdoc'
-                        . substr($relativeLinkPath, 0, -strlen('.md'))
+                        Path::join(
+                            DIRECTORY_SEPARATOR,
+                            $docPageSegment,
+                            'viewdoc',
+                            $finalPath
+                        )
                     );
-                    $this->log('changed: ' . $linkHref . ' to: ' . $link->getAttribute("href"));
+                    $this->log('    > Changed link from: ' . $linkHref . ' to: ' . $link->getAttribute("href"));
                 }
             }
 
             $images = $htmlDocument->getElementsByTagName('img');
             foreach ($images as $image) {
-                $imageSRC = $image->getAttribute("src");
+                $imageSRC = $image->getAttribute('src');
                 $fullImagePath = dirname($file) . DIRECTORY_SEPARATOR . $imageSRC;
 
                 if (str_contains($imageSRC, 'http') == false) {
                     $image->setAttribute('src', $docPageUrl . '/streamInImage?imagePath=' . $fullImagePath);
-                    $this->log('changed: ' . $imageSRC . ' to: ' . $image->getAttribute("src"));
+                    $this->log('    > Changed image src from: ' . $imageSRC . ' to: ' . $image->getAttribute("src"));
                 }
             }
 
@@ -144,7 +151,8 @@ class GenerateUserGuides extends BuildTask
             $guide->Content = $htmlContent;
 
             $guide->write();
-            $this->log($file . ' was written');
+            $this->log('    > ' . $guide->Title . ' was written');
+            $this->log(' ');
         }
     }
 
