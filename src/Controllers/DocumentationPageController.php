@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Clippy\Controllers;
 
+use DOMDocument;
 use PageController;
 use SilverStripe\Clippy\Model\UserGuide;
 use SilverStripe\Control\HTTPRequest;
@@ -106,7 +107,7 @@ class DocumentationPageController extends PageController
     {
         $html = $this->getConvertedMD('_index.md');
 
-        $dom = new \DOMDocument();
+        $dom = new DOMDocument();
         $dom->preserveWhiteSpace = false;
         $dom->loadHTML($html);
         $list = $dom->getElementsByTagName('ul')->item(0);
@@ -125,6 +126,9 @@ class DocumentationPageController extends PageController
     public function getListData($list): ArrayList
     {
         $navData = ArrayList::create();
+        if (!is_object($list) || !$list->childNodes) {
+            return $navData;
+        }
         foreach ($list->childNodes as $child) {
 
             // we only care about 'li' children (not newlines etc - DOMDocument gives us all sorts of stuff)
@@ -179,9 +183,8 @@ class DocumentationPageController extends PageController
     {
         return DBHTMLText::create()->setValue($this->getConvertedMD($this->getFileName()));
     }
-
     /**
-     * Checks for the existence of .md doc with supplied filename and
+     * Checks for the existence of .md doc with supplied filepath
      * returns its contents converted to html string if file is found.
      * Falls back to default message if file is not found.
      *
@@ -190,9 +193,10 @@ class DocumentationPageController extends PageController
      */
     public function getConvertedMD($filename): string
     {
-        $guide = UserGuide::get()->filter('MarkdownPath', $this->getPath() . DIRECTORY_SEPARATOR . $filename)->first();
+        $filepath = Path::join($this->getPath(), $filename);
+        $guide = UserGuide::get()->filter('MarkdownPath', $filepath)->first();
 
-        if ($guide && $guide->exists() && $guide->Content) {
+        if ($filepath && $guide && $guide->exists() && $guide->Content) {
             return $guide->Content;
         } else {
             return '<h1>Not Found...</h1>
