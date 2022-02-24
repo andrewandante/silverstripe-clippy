@@ -3,6 +3,7 @@
 namespace SilverStripe\Clippy\Extension;
 
 use SilverStripe\Control\Controller;
+use SilverStripe\Control\Session;
 use SilverStripe\Core\Extension;
 
 class DocumentationPageMetaTagsExtension extends Extension
@@ -18,8 +19,13 @@ class DocumentationPageMetaTagsExtension extends Extension
     public function MetaTags(&$tags)
     {
         $request = Controller::curr()->getRequest();
+        $currentEditPageID = $request->getVar('EditPageID');
+        if ($currentEditPageID === null) {
+            $currentEditPageID = $request->getSession()->get('EditPageID');
+        }
 
-        if ($currentEditPageID = $request->getVar('EditPageID')) {
+        if ($currentEditPageID !== null) {
+            $request->getSession()->set('EditPageID', $currentEditPageID);
             $origIDTag = "<meta name=\"x-page-id\" content=\"{$this->owner->ID}\" />\n";
             $origEditLinkTag = "<meta name=\"x-cms-edit-link\" content=\"" . $this->owner->CMSEditLink() . "\" />\n";
 
@@ -30,6 +36,8 @@ class DocumentationPageMetaTagsExtension extends Extension
 
             $tags = str_replace($origIDTag, $newIDTag, $tags);
             $tags = str_replace($origEditLinkTag, $newEditLinkTag, $tags);
+        } else {
+            $request->getSession()->clear('EditPageID');
         }
     }
 }

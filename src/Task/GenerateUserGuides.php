@@ -13,6 +13,7 @@ use SilverStripe\Clippy\PageTypes\DocumentationPage;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Path;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\Clippy\Model\UserGuide;
 
@@ -58,6 +59,8 @@ class GenerateUserGuides extends BuildTask
             }
 
             $file = $file[0];
+
+            $this->log('Creating guide for file: ' . $file);
 
             $guide = UserGuide::create();
             $guide->Title = basename($file);
@@ -107,26 +110,40 @@ class GenerateUserGuides extends BuildTask
             $htmlDocument = new DOMDocument();
             $htmlDocument->loadHTML($htmlContent);
             $links = $htmlDocument->getElementsByTagName('a');
-            $docPageUrl = Director::absoluteBaseURL() . DocumentationPage::config()->get('default_url_segment');
+            $docPageSegment = DocumentationPage::config()->get('default_url_segment');
+            $docPageUrl = Director::absoluteBaseURL() . $docPageSegment;
 
             foreach ($links as $link) {
                 $linkHref = $link->getAttribute("href");
+                $fullLinkPath = dirname($file) . DIRECTORY_SEPARATOR . $linkHref;
+                $fullDocsDir = BASE_PATH . $configDir;
+                $relativeLinkPath = substr($fullLinkPath, strlen($fullDocsDir));
 
-                /** @TODO make links work again */
                 if ($this->isRelativeLink($linkHref) || !$this->isJumpToLink($linkHref)) {
-                    $link->setAttribute('href', $docPageUrl . '/linkPath/' . $linkHref);
-                    $this->log('changed: ' . $linkHref . ' to: ' . $link->getAttribute("href"));
+                    $finalPath = strpos($relativeLinkPath, '.md') !== false
+                        ? substr($relativeLinkPath, 0, -strlen('.md'))
+                        : $relativeLinkPath;
+                    $link->setAttribute(
+                        'href',
+                        Path::join(
+                            DIRECTORY_SEPARATOR,
+                            $docPageSegment,
+                            'viewdoc',
+                            $finalPath
+                        )
+                    );
+                    $this->log('    > Changed link from: ' . $linkHref . ' to: ' . $link->getAttribute("href"));
                 }
             }
 
             $images = $htmlDocument->getElementsByTagName('img');
             foreach ($images as $image) {
-                $imageSRC = $image->getAttribute("src");
+                $imageSRC = $image->getAttribute('src');
                 $fullImagePath = dirname($file) . DIRECTORY_SEPARATOR . $imageSRC;
 
                 if (str_contains($imageSRC, 'http') == false) {
                     $image->setAttribute('src', $docPageUrl . '/streamInImage?imagePath=' . $fullImagePath);
-                    $this->log('changed: ' . $imageSRC . ' to: ' . $image->getAttribute("src"));
+                    $this->log('    > Changed image src from: ' . $imageSRC . ' to: ' . $image->getAttribute("src"));
                 }
             }
 
@@ -134,7 +151,8 @@ class GenerateUserGuides extends BuildTask
             $guide->Content = $htmlContent;
 
             $guide->write();
-            $this->log($file . ' was written');
+            $this->log('    > ' . $guide->Title . ' was written');
+            $this->log(' ');
         }
     }
 

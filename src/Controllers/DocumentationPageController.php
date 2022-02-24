@@ -24,7 +24,10 @@ class DocumentationPageController extends PageController
     private static array $allowed_actions = [
         'viewdoc',
         'streamInImage',
-        'linkPath',
+    ];
+
+    private static array $url_handlers = [
+        'viewdoc/$*' => 'viewdoc',
     ];
 
     /**
@@ -64,16 +67,6 @@ class DocumentationPageController extends PageController
             return file_get_contents($streamInImage);
         }
         return 'Image not found';
-    }
-
-    // @TODO later fix this (it does links)
-    public function linkPath(HTTPRequest $request): string
-    {
-        $streamInImage = $request->getVar('linkPath');
-//        if (file_exists(BASE_PATH . $streamInImage)) {
-//            return file_get_contents(BASE_PATH . $streamInImage);
-//        }
-//        return 'Image not found';
     }
 
     /**
@@ -160,19 +153,18 @@ class DocumentationPageController extends PageController
     }
 
     /**
-     * Define filename of document being requested via url param "ID"
+     * Define filename of document being requested as params after viewdoc
      *
      * @return string
      */
     public function getFileName(): string
     {
         $filename = 'introduction.md';
-        $params = $this->getURLParams();
+        $request = $this->getRequest();
+        $action = $request->param('Action');
 
-        if (isset($params['Action']) && $params['Action'] === 'viewdoc') {
-            if (isset($params['ID'])) {
-                $filename = $params['ID'] . '.md';
-            }
+        if (isset($action) && $action === 'viewdoc' && $request->remaining() !== '') {
+            $filename =  $request->remaining() . '.md';
         }
 
         return $filename;

@@ -2,6 +2,7 @@
 
 namespace SilverStripe\Clippy\Extension;
 
+use SilverStripe\Clippy\Model\UserGuide;
 use SilverStripe\Clippy\PageTypes\DocumentationPage;
 use SilverStripe\CMS\Controllers\CMSMain;
 use SilverStripe\Control\Controller;
@@ -22,8 +23,17 @@ class SiteTreePreviewLinkExtension extends Extension
     {
         $controller = Controller::curr();
         if ($controller instanceof CMSMain && $controller->getTabIdentifier() === 'guide') {
+            $urlSegment = DocumentationPage::get()->first()->Link('viewdoc');
+            $ugid = $controller->getRequest()->getVar('ugid');
+            if ($ugid !== null) {
+                /** @var UserGuide $guide */
+                $guide = UserGuide::get()->byID($ugid);
+                if ($guide && $guide->exists()) {
+                    $urlSegment .= $guide->getUrlSegment();
+                }
+            }
             $link = Controller::join_links(
-                DocumentationPage::get()->first()->RelativeLink(),
+                $urlSegment,
                 '?EditPageID=' . $this->owner->ID,
                 '?Stage=Live',
                 '?CMSPreview=1'
