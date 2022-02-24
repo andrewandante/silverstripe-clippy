@@ -48,8 +48,6 @@ class GenerateUserGuides extends BuildTask
             RecursiveRegexIterator::GET_MATCH
         );
 
-        $guides = UserGuide::get();
-
         foreach ($files as $file) {
             $fileType = pathinfo($file[0], PATHINFO_EXTENSION);
 
@@ -59,92 +57,75 @@ class GenerateUserGuides extends BuildTask
             }
 
             $file = $file[0];
-            $guide = $guides->find('MarkdownPath', $file);
 
-            // @TODO make this work for non-markdown files
-            if (is_null($guide)) {
-                $guide = UserGuide::create();
-                $guide->Title = basename($file);
-                $guide->Type = $fileType;
-                $guide->MarkdownPath = $file;
-                // Attempt to derive class from directory structure a la templates
-                $classCandidate = str_replace(
-                    DIRECTORY_SEPARATOR,
-                    '\\',
-                    substr($file, strlen($guideDirectory), -strlen('.md'))
-                );
+            $guide = UserGuide::create();
+            $guide->Title = basename($file);
+            $guide->Type = $fileType;
+            $guide->MarkdownPath = $file;
+            // Attempt to derive class from directory structure a la templates
+            $classCandidate = str_replace(
+                DIRECTORY_SEPARATOR,
+                '\\',
+                substr($file, strlen($guideDirectory), -strlen('.md'))
+            );
 
+            if (ClassInfo::exists($classCandidate)) {
+                $guide->DerivedClass = $classCandidate;
+            }
+
+            $htmlContent = "";
+            $fileContents = file_get_contents($file);
+
+            // @TODO use something like Injector::inst()->get(UserGuideMarkdownConverter::class) to allow
+            // injection and configuration
+            $converter = new GithubFlavoredMarkdownConverter();
+            $markdown = $converter->convert($fileContents);
+
+            $references = $markdown->getDocument()->getReferenceMap();
+            if ($references->contains('ClassName')) {
+                $classCandidate = $references->get('ClassName')->getTitle();
                 if (ClassInfo::exists($classCandidate)) {
                     $guide->DerivedClass = $classCandidate;
                 }
             }
 
-            $htmlContent = "";
-            $fileContents = file_get_contents($file);
-            if ($fileType === 'html') {
-                $htmlContent = $fileContents;
+            if ($references->contains('Title')) {
+                $guide->Title = $references->get('Title')->getTitle();
             }
 
-            if ($fileType === 'md') {
-                // prototyping
-                // Not sure if this is a good idea
-                if (strstr($fileContents, '@UserDocs_Skip')) {
-                    $fileContents = str_replace('@UserDocs_Skip=', '', $fileContents);
-                    $this->log('@UserDocs_Skip found - skip ' . $file);
-                    continue;
-                }
-
-                // @TODO - this only works if the annotation is at the bottom of the file, fix that
-                $derivedClass = trim(
-                    str_replace(
-                        '@UserDocs_Class_Name=',
-                        '',
-                        strstr($fileContents, '@UserDocs_Class_Name=')
-                    )
-                );
-                if ($derivedClass) {
-                    if (ClassInfo::exists($derivedClass)) {
-                        $guide->DerivedClass = $derivedClass;
-                        $fileContents = str_replace('@UserDocs_Class_Name=' . $derivedClass, '', $fileContents);
-                    }
-                }
-
-                // @TODO use something like Injector::inst()->get(UserGuideMarkdownConverter::class) to allow
-                // injection and configuration
-                $converter = new GithubFlavoredMarkdownConverter();
-                $htmlContent = $converter->convert($fileContents)->getContent();
+            if ($references->contains('Description')) {
+                $guide->Description = $references->get('Description')->getTitle();
             }
 
+            $htmlContent = $markdown->getContent();
 
-            if ($fileType === 'md' || $fileType === 'html') {
-                // transform any urls that do not have an https:// we can assume they are relative links
-                $htmlDocument = new DOMDocument();
-                $htmlDocument->loadHTML($htmlContent);
-                $links = $htmlDocument->getElementsByTagName('a');
-                $siteURL = Director::absoluteBaseURL();
+            // transform any urls that do not have an https:// we can assume they are relative links
+            $htmlDocument = new DOMDocument();
+            $htmlDocument->loadHTML($htmlContent);
+            $links = $htmlDocument->getElementsByTagName('a');
+            $siteURL = Director::absoluteBaseURL();
 
-                foreach ($links as $link) {
-                    $linkHref = $link->getAttribute("href");
+            foreach ($links as $link) {
+                $linkHref = $link->getAttribute("href");
 
-                    if ($this->isRelativeLink($linkHref) || !$this->isJumpToLink($linkHref)) {
-                        $link->setAttribute('href', $siteURL . 'userguides?filePath=' . $linkHref);
-                        $this->log('changed: ' . $linkHref . ' to: ' . $link->getAttribute("href"));
-                    }
+                if ($this->isRelativeLink($linkHref) || !$this->isJumpToLink($linkHref)) {
+                    $link->setAttribute('href', $siteURL . 'userguides?filePath=' . $linkHref);
+                    $this->log('changed: ' . $linkHref . ' to: ' . $link->getAttribute("href"));
                 }
-
-                $images = $htmlDocument->getElementsByTagName('img');
-                foreach ($images as $image) {
-                    $imageSRC = $image->getAttribute("src");
-
-                    if (str_contains($imageSRC, 'http') == false) {
-                        $image->setAttribute('src', $siteURL . 'userguides?streamInImage=' . $imageSRC);
-                        $this->log('changed: ' . $imageSRC . ' to: ' . $image->getAttribute("src"));
-                    }
-                }
-
-                $htmlContent = $htmlDocument->saveHTML();
-                $guide->Content = $htmlContent;
             }
+
+            $images = $htmlDocument->getElementsByTagName('img');
+            foreach ($images as $image) {
+                $imageSRC = $image->getAttribute("src");
+
+                if (str_contains($imageSRC, 'http') == false) {
+                    $image->setAttribute('src', $siteURL . 'userguides?streamInImage=' . $imageSRC);
+                    $this->log('changed: ' . $imageSRC . ' to: ' . $image->getAttribute("src"));
+                }
+            }
+
+            $htmlContent = $htmlDocument->saveHTML();
+            $guide->Content = $htmlContent;
 
             $guide->write();
             $this->log($file . ' was written');
