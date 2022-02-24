@@ -24,7 +24,6 @@ class DocumentationPageController extends PageController
     private static array $allowed_actions = [
         'viewdoc',
         'streamInImage',
-        'linkPath',
     ];
 
     /**
@@ -64,16 +63,6 @@ class DocumentationPageController extends PageController
             return file_get_contents($streamInImage);
         }
         return 'Image not found';
-    }
-
-    // @TODO later fix this (it does links)
-    public function linkPath(HTTPRequest $request): string
-    {
-        $streamInImage = $request->getVar('linkPath');
-//        if (file_exists(BASE_PATH . $streamInImage)) {
-//            return file_get_contents(BASE_PATH . $streamInImage);
-//        }
-//        return 'Image not found';
     }
 
     /**
@@ -169,6 +158,7 @@ class DocumentationPageController extends PageController
         $filename = 'introduction.md';
         $params = $this->getURLParams();
 
+        // @TODO fix nested links
         if (isset($params['Action']) && $params['Action'] === 'viewdoc') {
             if (isset($params['ID'])) {
                 $filename = $params['ID'] . '.md';

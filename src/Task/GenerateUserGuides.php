@@ -107,14 +107,24 @@ class GenerateUserGuides extends BuildTask
             $htmlDocument = new DOMDocument();
             $htmlDocument->loadHTML($htmlContent);
             $links = $htmlDocument->getElementsByTagName('a');
-            $docPageUrl = Director::absoluteBaseURL() . DocumentationPage::config()->get('default_url_segment');
+            $docPageSegment = DocumentationPage::config()->get('default_url_segment');
+            $docPageUrl = Director::absoluteBaseURL() . $docPageSegment;
 
             foreach ($links as $link) {
                 $linkHref = $link->getAttribute("href");
+                $fullLinkPath = dirname($file) . DIRECTORY_SEPARATOR . $linkHref;
+                $fullDocsDir = BASE_PATH . $configDir;
+                $relativeLinkPath = substr($fullLinkPath, strlen($fullDocsDir));
 
-                /** @TODO make links work again */
                 if ($this->isRelativeLink($linkHref) || !$this->isJumpToLink($linkHref)) {
-                    $link->setAttribute('href', $docPageUrl . '/linkPath/' . $linkHref);
+                    $link->setAttribute(
+                        'href',
+                        DIRECTORY_SEPARATOR
+                        . $docPageSegment
+                        . DIRECTORY_SEPARATOR
+                        . 'viewdoc'
+                        . substr($relativeLinkPath, 0, -strlen('.md'))
+                    );
                     $this->log('changed: ' . $linkHref . ' to: ' . $link->getAttribute("href"));
                 }
             }
