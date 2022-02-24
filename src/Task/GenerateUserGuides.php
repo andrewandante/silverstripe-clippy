@@ -9,6 +9,7 @@ use RecursiveIteratorIterator;
 use RecursiveRegexIterator;
 use RegexIterator;
 use SilverStripe\Clippy\Controllers\DocumentationPageController;
+use SilverStripe\Clippy\PageTypes\DocumentationPage;
 use SilverStripe\Control\Director;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
@@ -78,7 +79,10 @@ class GenerateUserGuides extends BuildTask
 
             // @TODO use something like Injector::inst()->get(UserGuideMarkdownConverter::class) to allow
             // injection and configuration
-            $converter = new GithubFlavoredMarkdownConverter();
+            $converter = new GithubFlavoredMarkdownConverter([
+                'html_input' => 'strip',
+                'allow_unsafe_links' => true,
+            ]);
             $markdown = $converter->convert($fileContents);
 
             $references = $markdown->getDocument()->getReferenceMap();
@@ -103,13 +107,14 @@ class GenerateUserGuides extends BuildTask
             $htmlDocument = new DOMDocument();
             $htmlDocument->loadHTML($htmlContent);
             $links = $htmlDocument->getElementsByTagName('a');
-            $siteURL = Director::absoluteBaseURL();
+            $docPageUrl = Director::absoluteBaseURL() . DocumentationPage::config()->get('default_url_segment');
 
             foreach ($links as $link) {
                 $linkHref = $link->getAttribute("href");
 
+                /** @TODO make links work again */
                 if ($this->isRelativeLink($linkHref) || !$this->isJumpToLink($linkHref)) {
-                    $link->setAttribute('href', $siteURL . 'userguides?filePath=' . $linkHref);
+                    $link->setAttribute('href', $docPageUrl . '/linkPath/' . $linkHref);
                     $this->log('changed: ' . $linkHref . ' to: ' . $link->getAttribute("href"));
                 }
             }
@@ -117,9 +122,10 @@ class GenerateUserGuides extends BuildTask
             $images = $htmlDocument->getElementsByTagName('img');
             foreach ($images as $image) {
                 $imageSRC = $image->getAttribute("src");
+                $fullImagePath = dirname($file) . DIRECTORY_SEPARATOR . $imageSRC;
 
                 if (str_contains($imageSRC, 'http') == false) {
-                    $image->setAttribute('src', $siteURL . 'userguides?streamInImage=' . $imageSRC);
+                    $image->setAttribute('src', $docPageUrl . '/streamInImage?imagePath=' . $fullImagePath);
                     $this->log('changed: ' . $imageSRC . ' to: ' . $image->getAttribute("src"));
                 }
             }
