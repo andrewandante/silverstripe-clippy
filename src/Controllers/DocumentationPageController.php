@@ -163,7 +163,7 @@ class DocumentationPageController extends PageController
         $request = $this->getRequest();
         $action = $request->param('Action');
 
-        if (isset($action) && $action === 'viewdoc') {
+        if (isset($action) && $action === 'viewdoc' && $request->remaining() !== '') {
             $filename =  $request->remaining() . '.md';
         }
 

@@ -17,7 +17,7 @@ class UserGuide extends DataObject
         'Title' => 'Varchar',
         'Description' => 'Varchar',
         'Content' => 'HTMLText',
-        'MarkdownPath' => 'Varchar', //@TODO update to FilePath as we are doing more than just .md now
+        'MarkdownPath' => 'Varchar',
         'DerivedClass' => 'Varchar',
     ];
 
