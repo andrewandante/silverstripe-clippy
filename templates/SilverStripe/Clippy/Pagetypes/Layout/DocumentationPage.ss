@@ -12,7 +12,9 @@
                 <div class="userguide__menu navigation navigation--secondary">
                     <h4 class="cuserguide__menu-title">Menu</h4>
                     <span class="close"></span>
-                    $Navigation
+                    <% if $Navigation %>
+                        <% include SilverStripe\Clippy\Includes\DocumentationPageMenu List=$Navigation %>
+                    <% end_if %>
                 </div>
                 <div class="userguide__content">
                     $Content
