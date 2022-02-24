@@ -2,8 +2,9 @@
 
 namespace SilverStripe\Clippy\Controllers;
 
-use League\CommonMark\GithubFlavoredMarkdownConverter;
 use PageController;
+use SilverStripe\Clippy\Model\UserGuide;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Path;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\FieldType\DBHTMLText;
@@ -22,6 +23,8 @@ class DocumentationPageController extends PageController
 
     private static array $allowed_actions = [
         'viewdoc',
+        'streamInImage',
+        'linkPath',
     ];
 
     /**
@@ -54,6 +57,25 @@ class DocumentationPageController extends PageController
         ];
     }
 
+    public function streamInImage(HTTPRequest $request): string
+    {
+        $streamInImage = $request->getVar('imagePath');
+        if (file_exists($streamInImage)) {
+            return file_get_contents($streamInImage);
+        }
+        return 'Image not found';
+    }
+
+    // @TODO later fix this (it does links)
+    public function linkPath(HTTPRequest $request): string
+    {
+        $streamInImage = $request->getVar('linkPath');
+//        if (file_exists(BASE_PATH . $streamInImage)) {
+//            return file_get_contents(BASE_PATH . $streamInImage);
+//        }
+//        return 'Image not found';
+    }
+
     /**
      * Define path of directory where md docs reside
      *
@@ -75,8 +97,7 @@ class DocumentationPageController extends PageController
     public function getScreenshotsDirPath(): string
     {
         return Path::join(
-            '/',
-            RESOURCES_DIR,
+            BASE_PATH,
             $this->Config()->get('screenshots_dir')
         );
     }
@@ -134,7 +155,7 @@ class DocumentationPageController extends PageController
                 }
             }
         }
-        
+
         return $navData;
     }
 
@@ -164,16 +185,7 @@ class DocumentationPageController extends PageController
      */
     public function getContent(): string
     {
-        $filename = $this->getFileName();
-
-        // Replace filepath variable with configured file path
-        $content = str_replace(
-            '<img src="$screenshots_dir',
-            '<img src="' . $this->getScreenshotsDirPath(),
-            $this->getConvertedMD($filename)
-        );
-
-        return DBHTMLText::create()->setValue($content);
+        return DBHTMLText::create()->setValue($this->getConvertedMD($this->getFileName()));
     }
 
     /**
@@ -186,24 +198,15 @@ class DocumentationPageController extends PageController
      */
     public function getConvertedMD($filename): string
     {
-        $path = $this->getPath();
+        $guide = UserGuide::get()->filter('MarkdownPath', $this->getPath() . DIRECTORY_SEPARATOR . $filename)->first();
 
-        $converter = new GithubFlavoredMarkdownConverter([
-            'html_input' => 'strip',
-            'allow_unsafe_links' => true,
-        ]);
-
-        if (file_exists(Path::join($path, $filename))) {
-            $raw = file_get_contents(Path::join($path, $filename));
-            $converted = $converter->convertToHtml($raw);
-            $content = $converted->getContent();
+        if ($guide && $guide->exists() && $guide->Content) {
+            return $guide->Content;
         } else {
-            $content = '<h1>Not Found...</h1>
+            return '<h1>Not Found...</h1>
                 <hr/>
                 <p>Sorry, there is no documentation available for the requested url.</p>';
         }
-
-        return $content;
     }
 
     /**
@@ -220,4 +223,3 @@ class DocumentationPageController extends PageController
     }
 
 }
-
