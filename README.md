@@ -2,6 +2,18 @@
 
 Context-driven documentation for the CMS, driven by markdown!
 
+## Formatting
+
+Prepend your markdown files like so:
+
+```md
+[ClassName]: / (Page)
+[Title]: / (This is the Demo Page)
+[Description]: / (This is a Demo page that you can see a demo on)
+```
+
+To populate those fields on the object
+
 ## License
 See [License](license.md)
 

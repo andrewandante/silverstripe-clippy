@@ -2,7 +2,6 @@
 
 namespace SilverStripe\Clippy\Extension;
 
-use SilverStripe\Clippy\Controllers\DocumentationPageController;
 use SilverStripe\Clippy\PageTypes\DocumentationPage;
 use SilverStripe\CMS\Controllers\CMSMain;
 use SilverStripe\Control\Controller;

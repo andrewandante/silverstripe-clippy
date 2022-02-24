@@ -6,42 +6,22 @@ use SilverStripe\ORM\DataObject;
 
 class UserGuide extends DataObject
 {
-    private static $table_name = 'UserGuide';
+    private static string $table_name = 'UserGuide';
 
-    private static $db = [
+    private static string $singular_name = 'User Guide';
+
+    private static array $db = [
         'Type' => 'Varchar',
         'Title' => 'Varchar',
-        'PreNotes' => 'HTMLText',
+        'Description' => 'Varchar',
         'Content' => 'HTMLText',
-        'PostNotes' => 'HTMLText',
         'MarkdownPath' => 'Varchar', //@TODO update to FilePath as we are doing more than just .md now
         'DerivedClass' => 'Varchar',
     ];
 
-    private static $summary_fields = [
-        'Type' => 'File type',
-        'Title' => 'File Name',
-        'DerivedClass' => 'Class',
+    private static array $summary_fields = [
+        'Title' => 'Title',
+        'Description' => 'Description',
     ];
 
-    public function getCMSFields()
-    {
-        $fields = parent::getCMSFields();
-
-        $fields->removeByName([
-            'PreNotes',
-            'PostNotes'
-        ]);
-
-        $fields->makeFieldReadonly([
-            'Title',
-            'Content',
-            'MarkdownPath',
-            'DerivedClass',
-        ]);
-
-        $fields->dataFieldByName('Content')->addExtraClass('img-max-width table-borders');
-
-        return $fields;
-    }
 }
