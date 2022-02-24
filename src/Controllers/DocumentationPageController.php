@@ -134,6 +134,8 @@ class DocumentationPageController extends PageController
                 }
             }
         }
+        
+        return $navData;
     }
 
     /**
