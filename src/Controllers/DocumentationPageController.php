@@ -26,6 +26,10 @@ class DocumentationPageController extends PageController
         'streamInImage',
     ];
 
+    private static array $url_handlers = [
+        'viewdoc/$*' => 'viewdoc',
+    ];
+
     /**
      * Only allow those with CMS access to view this page
      */
@@ -149,20 +153,18 @@ class DocumentationPageController extends PageController
     }
 
     /**
-     * Define filename of document being requested via url param "ID"
+     * Define filename of document being requested as params after viewdoc
      *
      * @return string
      */
     public function getFileName(): string
     {
         $filename = 'introduction.md';
-        $params = $this->getURLParams();
+        $request = $this->getRequest();
+        $action = $request->param('Action');
 
-        // @TODO fix nested links
-        if (isset($params['Action']) && $params['Action'] === 'viewdoc') {
-            if (isset($params['ID'])) {
-                $filename = $params['ID'] . '.md';
-            }
+        if (isset($action) && $action === 'viewdoc') {
+            $filename =  $request->remaining() . '.md';
         }
 
         return $filename;
