@@ -4,6 +4,8 @@ namespace SilverStripe\Clippy\Controllers;
 
 use DOMDocument;
 use PageController;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use SilverStripe\Clippy\Model\UserGuide;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Path;
@@ -84,19 +86,6 @@ class DocumentationPageController extends PageController
     }
 
     /**
-     * Define path of directory where screenshots reside
-     *
-     * @return string
-     */
-    public function getScreenshotsDirPath(): string
-    {
-        return Path::join(
-            BASE_PATH,
-            $this->Config()->get('screenshots_dir')
-        );
-    }
-
-    /**
      * Get index to display as navigation menu.
      * This parses the converted markdown (html) from _index.md and constructs as
      * ArrayList which can be iterated over (in a frontend template, for example).
@@ -108,7 +97,6 @@ class DocumentationPageController extends PageController
         $html = $this->getConvertedMD('_index.md');
 
         $dom = new DOMDocument();
-        $dom->preserveWhiteSpace = false;
         $dom->loadHTML($html);
         $list = $dom->getElementsByTagName('ul')->item(0);
 
@@ -130,16 +118,23 @@ class DocumentationPageController extends PageController
             return $navData;
         }
         foreach ($list->childNodes as $child) {
-
             // we only care about 'li' children (not newlines etc - DOMDocument gives us all sorts of stuff)
             if ($child->nodeName === 'li') {
                 $data = [];
 
-                // get data from the (first) 'a' tag contained in this 'li'
-                if ($child->getElementsByTagName('a')->item(0)) {
+                // check here to see if the FIRST thing in this li is the label text (ie, not wrapped in an a tag)
+                $firstChildData = array_filter(explode(PHP_EOL, $child->firstChild->data)); // remove newlines etc
+                $nonLinkItemData = current($firstChildData); // will be null if this li contains only tags, such as <a>
+
+                if ($nonLinkItemData) {
+                    $data['Type'] = 'Item';
+                    $data['Title'] = $nonLinkItemData;
+                } elseif ($child->getElementsByTagName('a')->item(0)) {
+                    // get data from the (first) 'a' tag contained in this 'li'
                     $link = $child->getElementsByTagName('a')->item(0);
                     $data['Title'] = $link->nodeValue;
                     $data['Link'] = $link->getAttribute('href');
+                    $data['Type'] = 'Link';
                 }
 
                 // recursively add any nested 'ul' nodes
@@ -158,6 +153,7 @@ class DocumentationPageController extends PageController
 
     /**
      * Define filename of document being requested as params after viewdoc
+     * (defaults to introduction.md if no file is specified - seemed reasonable enough)
      *
      * @return string
      */
@@ -183,6 +179,7 @@ class DocumentationPageController extends PageController
     {
         return DBHTMLText::create()->setValue($this->getConvertedMD($this->getFileName()));
     }
+
     /**
      * Checks for the existence of .md doc with supplied filepath
      * returns its contents converted to html string if file is found.
