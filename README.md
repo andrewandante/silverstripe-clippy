@@ -66,6 +66,7 @@ Ironically, @TODO
 ## Contributors
  * Lianna Blanca Gonlag (Thanks for keeping our Documentation organised and the massive effort in writing it!)
  * Werner Kraus (Thanks for stopping that pesky CMS Preview from redirecting!)
+ * Beth McPhail and Cassie Zoest (Thanks for adding much needed sanity to our design ideas!)
 
 ## Bugtracker
 Bugs are tracked in the issues section of this repository. Before submitting an issue please read over
