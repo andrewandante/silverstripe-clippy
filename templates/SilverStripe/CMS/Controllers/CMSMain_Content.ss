@@ -28,7 +28,7 @@
                     <% if $HasUserGuides %>
                     <li class="nav-item content-listview<% if $TabIdentifier == 'guide' %> ui-tabs-active<% end_if %>">
                         <a href="$LinkPageUserGuide" class="nav-link cms-panel-link" title="Form_EditForm" data-href="$LinkPageUserGuide">
-                            User Guides
+                            &#128214; User Guides
                         </a>
                     </li>
                     <% end_if %>

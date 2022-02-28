@@ -3,3 +3,4 @@ node_modules
 .DS_Store
 /resources/
 /_resources/
+composer.lock
