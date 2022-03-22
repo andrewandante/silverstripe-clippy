@@ -11,20 +11,37 @@ use RegexIterator;
 use SilverStripe\Clippy\Controllers\DocumentationPageController;
 use SilverStripe\Clippy\PageTypes\DocumentationPage;
 use SilverStripe\Control\Director;
+use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Path;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\Clippy\Model\UserGuide;
+use SilverStripe\ORM\ValidationException;
 
 class GenerateUserGuides extends BuildTask
 {
+    /**
+     * @var string
+     * @config
+     */
     private static $segment = 'GenerateUserGuides';
 
+    /**
+     * @var string
+     */
     protected $title = 'Creates record links to user guides';
 
+    protected bool $verbose;
+
+    /**
+     * @param HTTPRequest $request
+     * @throws ValidationException
+     */
     public function run($request)
     {
+        $this->verbose = (bool) $request->getVar('verbose');
+        $count = 0;
 
         /** @var UserGuide $existingUserguide */
         foreach (UserGuide::get() as $existingUserguide) {
@@ -151,23 +168,27 @@ class GenerateUserGuides extends BuildTask
             $guide->Content = $htmlContent;
 
             $guide->write();
+            ++$count;
             $this->log('    > ' . $guide->Title . ' was written');
             $this->log(' ');
         }
+        $this->log($count . ' total guides written', true);
     }
 
-    protected function log($message)
+    protected function log(string $message, bool $force = false): void
     {
-        echo $message . (Director::is_cli() ? PHP_EOL : '<br>');
+        if ($this->verbose || $force) {
+            echo $message . (Director::is_cli() ? PHP_EOL : '<br>');
+        }
     }
 
     // We determine a relative link to either contain 'http'
-    protected function isRelativeLink($linkHref)
+    protected function isRelativeLink(string $linkHref): bool
     {
         return str_contains($linkHref, 'http') == false;
     }
 
-    protected function isJumpToLink($linkHref)
+    protected function isJumpToLink(string $linkHref): bool
     {
         return substr($linkHref, 0, 1) === '#';
     }
