@@ -3,12 +3,12 @@
 namespace SilverStripe\Clippy\Task;
 
 use DOMDocument;
-use League\CommonMark\GithubFlavoredMarkdownConverter;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use RecursiveRegexIterator;
 use RegexIterator;
 use SilverStripe\Clippy\Controllers\DocumentationPageController;
+use SilverStripe\Clippy\Converter\MarkdownConverter;
 use SilverStripe\Clippy\PageTypes\DocumentationPage;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\HTTPRequest;
@@ -99,10 +99,7 @@ class GenerateUserGuides extends BuildTask
 
             // @TODO use something like Injector::inst()->get(UserGuideMarkdownConverter::class) to allow
             // injection and configuration
-            $converter = new GithubFlavoredMarkdownConverter([
-                'html_input' => 'strip',
-                'allow_unsafe_links' => true,
-            ]);
+            $converter = new MarkdownConverter();
             $markdown = $converter->convert($fileContents);
 
             $references = $markdown->getDocument()->getReferenceMap();
