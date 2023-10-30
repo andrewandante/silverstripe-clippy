@@ -132,36 +132,37 @@ class GenerateUserGuides extends BuildTask
 
             foreach ($links as $link) {
                 $linkHref = $link->getAttribute("href");
+                if ($this->isAbsoluteLink($linkHref) || $this->isJumpToLink($linkHref)) {
+                    continue;
+                }
                 $fullLinkPath = dirname($file) . DIRECTORY_SEPARATOR . $linkHref;
                 $fullDocsDir = BASE_PATH . $configDir;
                 $relativeLinkPath = substr($fullLinkPath, strlen($fullDocsDir));
-
-                if ($this->isRelativeLink($linkHref) || !$this->isJumpToLink($linkHref)) {
-                    $finalPath = strpos($relativeLinkPath, '.md') !== false
-                        ? substr($relativeLinkPath, 0, -strlen('.md'))
-                        : $relativeLinkPath;
-                    $link->setAttribute(
-                        'href',
-                        Path::join(
-                            DIRECTORY_SEPARATOR,
-                            $docPageSegment,
-                            'viewdoc',
-                            $finalPath
-                        )
-                    );
-                    $this->log('    > Changed link from: ' . $linkHref . ' to: ' . $link->getAttribute("href"));
-                }
+                $finalPath = strpos($relativeLinkPath, '.md') !== false
+                    ? substr($relativeLinkPath, 0, -strlen('.md'))
+                    : $relativeLinkPath;
+                $link->setAttribute(
+                    'href',
+                    Path::join(
+                        DIRECTORY_SEPARATOR,
+                        $docPageSegment,
+                        'viewdoc',
+                        $finalPath
+                    )
+                );
+                $this->log('    > Changed relative link from: ' . $linkHref . ' to: ' . $link->getAttribute("href"));
             }
 
             $images = $htmlDocument->getElementsByTagName('img');
             foreach ($images as $image) {
                 $imageSRC = $image->getAttribute('src');
+                if ($this->isAbsoluteLink($imageSRC)) {
+                    continue;
+                }
                 $fullImagePath = dirname($file) . DIRECTORY_SEPARATOR . $imageSRC;
 
-                if (str_contains($imageSRC, 'http') == false) {
-                    $image->setAttribute('src', $docPageUrl . '/streamInImage?imagePath=' . $fullImagePath);
-                    $this->log('    > Changed image src from: ' . $imageSRC . ' to: ' . $image->getAttribute("src"));
-                }
+                $image->setAttribute('src', $docPageUrl . '/streamInImage?imagePath=' . $fullImagePath);
+                $this->log('    > Changed relative image src from: ' . $imageSRC . ' to: ' . $image->getAttribute("src"));
             }
 
             $htmlContent = $htmlDocument->saveHTML();
@@ -182,14 +183,13 @@ class GenerateUserGuides extends BuildTask
         }
     }
 
-    // We determine a relative link to either contain 'http'
-    protected function isRelativeLink(string $linkHref): bool
-    {
-        return str_contains($linkHref, 'http') == false;
-    }
-
     protected function isJumpToLink(string $linkHref): bool
     {
         return substr($linkHref, 0, 1) === '#';
+    }
+
+    protected function isAbsoluteLink(string $linkHref): bool
+    {
+        return strpos($linkHref, 'http://') === 0 || strpos($linkHref, 'https://') === 0;
     }
 }
