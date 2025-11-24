@@ -3,16 +3,16 @@
 namespace SilverStripe\Clippy\Extension;
 
 use SilverStripe\Admin\CMSMenu;
-use SilverStripe\Admin\LeftAndMainExtension;
 use SilverStripe\Clippy\PageTypes\DocumentationPage;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Extension;
 
-class DocumentationPageLeftAndMain extends LeftAndMainExtension
+class DocumentationPageLeftAndMain extends Extension
 {
 
-    private static string $menu_icon = 'font-icon-block-media';
+    private static string $cms_menu_icon = 'font-icon-block-media';
 
-    public function init()
+    public function onInit()
     {
         // unique identifier for this item. Will have an ID of Menu-$ID
         $id = 'LinkToDocumentationPage';

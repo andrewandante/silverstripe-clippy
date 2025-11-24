@@ -8,7 +8,7 @@ use SilverStripe\Forms\GridField\GridField_ActionMenuItem;
 use SilverStripe\Forms\GridField\GridField_ActionMenuLink;
 use SilverStripe\Forms\GridField\GridField_ColumnProvider;
 use SilverStripe\Clippy\Controllers\CMSUserGuideController;
-use SilverStripe\View\ArrayData;
+use SilverStripe\Model\ArrayData;
 use SilverStripe\View\SSViewer;
 
 /**

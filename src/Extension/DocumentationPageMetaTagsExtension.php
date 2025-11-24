@@ -3,7 +3,6 @@
 namespace SilverStripe\Clippy\Extension;
 
 use SilverStripe\Control\Controller;
-use SilverStripe\Control\Session;
 use SilverStripe\Core\Extension;
 
 class DocumentationPageMetaTagsExtension extends Extension
@@ -16,7 +15,7 @@ class DocumentationPageMetaTagsExtension extends Extension
      *
      * @param string $tags
      */
-    public function MetaTags(&$tags)
+    public function updateMetaTags(&$tags)
     {
         $request = Controller::curr()->getRequest();
         $currentEditPageID = $request->getVar('EditPageID');

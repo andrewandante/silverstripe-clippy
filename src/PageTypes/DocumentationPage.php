@@ -21,7 +21,7 @@ class DocumentationPage extends Page
 
     private static string $table_name = 'DocumentationPage';
 
-    private static string $icon_class = 'font-icon-book-open';
+    private static string $cms_icon_class = 'font-icon-book-open';
 
     private static string $controller_name = DocumentationPageController::class;
 
