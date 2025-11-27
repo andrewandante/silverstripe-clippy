@@ -58,6 +58,14 @@ class GenerateUserGuides extends BuildTask
             return;
         }
 
+        // ensure the base URL is sensible and has a trailing slash
+        $docPageSegment = DocumentationPage::config()->get('default_url_segment');
+        $baseUrl = Director::absoluteBaseURL();
+        if (str_ends_with($baseUrl, '/') === false) {
+            $baseUrl .= '/';
+        }
+        $docPageUrl = $baseUrl . $docPageSegment;
+
         // Find all .md files in the Guide Directory
         $directoryIterator = new RecursiveDirectoryIterator($guideDirectory);
         $iterator = new RecursiveIteratorIterator($directoryIterator);
@@ -124,8 +132,6 @@ class GenerateUserGuides extends BuildTask
             $htmlDocument = new DOMDocument();
             $htmlDocument->loadHTML($htmlContent);
             $links = $htmlDocument->getElementsByTagName('a');
-            $docPageSegment = DocumentationPage::config()->get('default_url_segment');
-            $docPageUrl = Director::absoluteBaseURL() . $docPageSegment;
 
             foreach ($links as $link) {
                 $linkHref = $link->getAttribute("href");
