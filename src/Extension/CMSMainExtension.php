@@ -36,7 +36,7 @@ class CMSMainExtension extends Extension
         $id = $this->owner->currentRecordID();
 
         if ($id) {
-            $page = Page::get()->setUseCache(true)->byID($id);
+            $page = Page::get()->byID($id);
         }
 
         if ($page) {

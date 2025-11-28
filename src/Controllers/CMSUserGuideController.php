@@ -29,7 +29,7 @@ class CMSUserGuideController extends CMSMain
     public function getEditForm($id = null, $fields = null): Form
     {
         $id = $this->currentRecordID();
-        $page = Page::get()->setUseCache(true)->byID($id);
+        $page = Page::get()->byID($id);
         $userguides = UserGuide::get()->filter('DerivedClass', $page->ClassName);
         if ($userguides && $userguides->count() > 0) {
             $fields = FieldList::create(
