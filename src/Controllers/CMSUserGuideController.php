@@ -3,14 +3,12 @@
 namespace SilverStripe\Clippy\Controllers;
 
 use SilverStripe\CMS\Controllers\CMSMain;
-use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Control\HTTPResponse;
-use SilverStripe\Control\HTTPResponse_Exception;
 use SilverStripe\Clippy\Model\UserGuide;
 use Page;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Clippy\GridField\UserGuideViewer;
+use SilverStripe\Forms\Form;
 
 class CMSUserGuideController extends CMSMain
 {
@@ -28,10 +26,10 @@ class CMSUserGuideController extends CMSMain
     ];
 
 
-    public function getEditForm($id = null, $fields = null)
+    public function getEditForm($id = null, $fields = null): Form
     {
-        $id = $this->currentPageID();
-        $page = Page::get_by_id($id);
+        $id = $this->currentRecordID();
+        $page = Page::get()->byID($id);
         $userguides = UserGuide::get()->filter('DerivedClass', $page->ClassName);
         if ($userguides && $userguides->count() > 0) {
             $fields = FieldList::create(

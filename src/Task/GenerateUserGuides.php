@@ -11,13 +11,14 @@ use SilverStripe\Clippy\Controllers\DocumentationPageController;
 use SilverStripe\Clippy\Converter\MarkdownConverter;
 use SilverStripe\Clippy\PageTypes\DocumentationPage;
 use SilverStripe\Control\Director;
-use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Path;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\Clippy\Model\UserGuide;
-use SilverStripe\ORM\ValidationException;
+use SilverStripe\PolyExecution\PolyOutput;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Command\Command;
 
 class GenerateUserGuides extends BuildTask
 {
@@ -30,17 +31,17 @@ class GenerateUserGuides extends BuildTask
     /**
      * @var string
      */
-    protected $title = 'Creates record links to user guides';
+    protected string $title = 'Creates record links to user guides';
 
     protected bool $verbose;
 
     /**
-     * @param HTTPRequest $request
-     * @throws ValidationException
-     */
-    public function run($request)
-    {
-        $this->verbose = (bool) $request->getVar('verbose');
+    * @param InputInterface $inputgit p
+    * @param PolyOutput $output
+    * @return integer
+    */
+    protected function execute(InputInterface $input, PolyOutput $output): int {
+        $this->verbose = (bool) $input->getOption('verbose');
         $count = 0;
 
         /** @var UserGuide $existingUserguide */
@@ -55,7 +56,7 @@ class GenerateUserGuides extends BuildTask
 
         if (!is_dir($guideDirectory)) {
             $this->log($configDir . ' does not exist - no user docs found');
-            return;
+            return Command::FAILURE;
         }
 
         // ensure the base URL is sensible and has a trailing slash
@@ -80,7 +81,7 @@ class GenerateUserGuides extends BuildTask
 
             // only support these types of files
             if (!in_array($fileType, $allowedFileExtensions)) {
-                return;
+                return Command::FAILURE;
             }
 
             $file = $file[0];
@@ -177,6 +178,7 @@ class GenerateUserGuides extends BuildTask
             $this->log(' ');
         }
         $this->log($count . ' total guides written', true);
+        return Command::SUCCESS;
     }
 
     protected function log(string $message, bool $force = false): void

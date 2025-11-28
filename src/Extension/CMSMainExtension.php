@@ -17,7 +17,7 @@ class CMSMainExtension extends Extension
     public function getLinkPageUserGuide(): ?string
     {
         $owner = $this->getOwner();
-        if ($id = $owner->currentPageID()) {
+        if ($id = $owner->currentRecordID()) {
             return $owner->LinkWithSearch(
                 Controller::join_links(CMSUserGuideController::singleton()->Link('show'), $id)
             );
@@ -33,10 +33,17 @@ class CMSMainExtension extends Extension
 
     public function getHasUserGuides(): bool
     {
-        $id = $this->owner->currentPageID();
-        $page = Page::get_by_id($id);
-        $userguides = UserGuide::get()->filter('DerivedClass', $page->ClassName);
+        $id = $this->owner->currentRecordID();
 
-        return $userguides && $userguides->count() > 0;
+        if ($id) {
+            $page = Page::get()->byID($id);
+        }
+
+        if ($page) {
+            $userguides = UserGuide::get()->filter('DerivedClass', $page->ClassName);           
+            return $userguides && $userguides->count() > 0;
+        }
+
+        return false;
     }
 }

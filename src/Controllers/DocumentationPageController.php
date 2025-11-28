@@ -7,11 +7,11 @@ use PageController;
 use SilverStripe\Clippy\Model\UserGuide;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Path;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\Model\ArrayData;
+use SilverStripe\Model\List\ArrayList;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
-use SilverStripe\View\ArrayData;
 
 /**
  * This page type allows for display of .md documentation files as html content within a web page.
