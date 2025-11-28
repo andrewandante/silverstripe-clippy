@@ -8,14 +8,14 @@ use SilverStripe\Core\Extension;
 class DocumentationPageMetaTagsExtension extends Extension
 {
     /**
-     * This method looks for the param EditPageID and if set, updates some meta tags in the CMSPreview
+     * This method looks for the param EditPageID and if set, updates some meta components in the CMSPreview
      * @see SiteTreePreviewLinkExtension
      *
      * This prevents the CMS from trying to redirect to the Documentation Page when it's in the Preview
      *
      * @param string $tags
      */
-    public function updateMetaTags(&$tags)
+    public function updateMetaComponents(&$tags)
     {
         $request = Controller::curr()->getRequest();
         $currentEditPageID = $request->getVar('EditPageID');
@@ -25,16 +25,14 @@ class DocumentationPageMetaTagsExtension extends Extension
 
         if ($currentEditPageID !== null) {
             $request->getSession()->set('EditPageID', $currentEditPageID);
-            $origIDTag = "<meta name=\"x-page-id\" content=\"{$this->owner->ID}\" />\n";
-            $origEditLinkTag = "<meta name=\"x-cms-edit-link\" content=\"" . $this->owner->CMSEditLink() . "\" />\n";
 
-            $modifiedCMSEditLink = str_replace($this->owner->ID, $currentEditPageID, $this->owner->CMSEditLink());
+            if (isset($tags['pageId'])) {
+                $tags['pageId']['attributes']['content'] = $currentEditPageID;
+            }
 
-            $newIDTag = "<meta name=\"x-page-id\" content=\"{$currentEditPageID}\" />\n";
-            $newEditLinkTag = "<meta name=\"x-cms-edit-link\" content=\"" . $modifiedCMSEditLink . "\" />\n";
-
-            $tags = str_replace($origIDTag, $newIDTag, $tags);
-            $tags = str_replace($origEditLinkTag, $newEditLinkTag, $tags);
+            if (isset($tags['cmsEditLink'])) {
+                $tags['cmsEditLink']['attributes']['content'] = str_replace($this->owner->ID, $currentEditPageID, $this->owner->CMSEditLink());
+            }
         } else {
             $request->getSession()->clear('EditPageID');
         }
