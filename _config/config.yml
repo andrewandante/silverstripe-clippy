@@ -17,7 +17,6 @@ SilverStripe\Clippy\PageTypes\DocumentationPage:
 
 SilverStripe\Clippy\Controllers\DocumentationPageController:
   docs_dir: /docs/userguides
-  screenshots_dir: /docs/userguides/img
   allowed_extensions:
     - md
 

@@ -24,12 +24,6 @@ class GenerateUserGuides extends BuildTask
 {
     /**
      * @var string
-     * @config
-     */
-    private static $segment = 'GenerateUserGuides';
-
-    /**
-     * @var string
      */
     protected string $title = 'Creates record links to user guides';
 

@@ -84,19 +84,6 @@ class DocumentationPageController extends PageController
     }
 
     /**
-     * Define path of directory where screenshots reside
-     *
-     * @return string
-     */
-    public function getScreenshotsDirPath(): string
-    {
-        return Path::join(
-            BASE_PATH,
-            $this->Config()->get('screenshots_dir')
-        );
-    }
-
-    /**
      * Get index to display as navigation menu.
      * This parses the converted markdown (html) from _index.md and constructs as
      * ArrayList which can be iterated over (in a frontend template, for example).
