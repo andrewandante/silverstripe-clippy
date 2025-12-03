@@ -1,6 +1,6 @@
 {
     "name": "silverstripe/clippy",
-    "description": "Module to remder documentation from .md format into a SilverStripe app.",
+    "description": "Module to render documentation from .md format into a SilverStripe app.",
     "type": "silverstripe-vendormodule",
     "keywords": [
         "silverstripe",

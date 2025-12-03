@@ -26,11 +26,6 @@ class DocumentationPageControllerTest extends FunctionalTest
     protected $docs_dir = '/app/tests/assets/documents/cms-docs/';
 
     /**
-     * @var string
-     */
-    protected $screenshots_dir = '/app/tests/assets/documents/cms-docs/';
-
-    /**
      * @var array
      */
     protected $params = [
@@ -58,7 +53,6 @@ class DocumentationPageControllerTest extends FunctionalTest
         $this->page = $this->objFromFixture(DocumentationPage::class, 'cms_user_guide');
         $this->controller = ModelAsController::controller_for($this->page);
         Config::inst()->merge(DocumentationPageController::class, 'docs_dir', $this->docs_dir);
-        Config::inst()->merge(DocumentationPageController::class, 'screenshots_dir', $this->screenshots_dir);
     }
 
     public function tearDown(): void
@@ -93,12 +87,6 @@ class DocumentationPageControllerTest extends FunctionalTest
     {
         $expected = Path::join(BASE_PATH, $this->docs_dir);
         $this->assertEquals($expected, $this->controller->getPath());
-    }
-
-    public function testGetScreenshotsDirPath(): void
-    {
-        $expected = Path::join('/', RESOURCES_DIR, $this->screenshots_dir);
-        $this->assertEquals($expected, $this->controller->getScreenshotsDirPath());
     }
 
     public function testGetNavigation(): void
